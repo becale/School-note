@@ -1,0 +1,682 @@
+openapi : 3.0.3
+
+info:
+  title: UniteEnseignement API
+  description: >
+    API permettant de gerer les unites d'enseignement, les groupes d'UE, les sous groupes d'UE, les semestres et 
+    Filiere.
+  version: "1.0.0"
+
+servers:
+  -url : http://localhost:8000
+  description: URL pour le developpement local et les tests
+
+paths:
+  #Unite d'enseignement
+  /unite-enseignements:
+    get:
+      parameters:
+      - name: limit
+        in: querry
+        required : false
+        schema:
+          type: integer
+      - name: isTroncCommun
+        in: querry
+        required : false
+        schema: 
+          type: boolean
+      - name: semestre
+        in: querry
+        required: false
+        schema: 
+          type: integer
+      - name: volume-horaire
+        in: querry
+        required: false
+        schema:
+          type: number    
+      summary: Retourne la liste des unites d'enseignement
+      operationId: getUniteEnseignements
+      description: >
+        Une liste des unites d'enseignement presentes en Base de donnees, pouvant etre filtree par groupe, semestre
+        isTroncCommun et une certaine limite d'occurence par page, volume Horaire.
+      responses:
+      '200':
+        description: OK 
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                unite-enseignements:
+                  type: array
+                  items: 
+                    $ref: '#/components/schemas/GetUniteEnseignementSchema'
+      '422': 
+        $ref: '#/components/responses/UnprocessableEntity'
+
+    post: 
+      summary: Ajouter une unite d'enseignement
+      operationId: ajoutUniteEnseignement
+      requestbody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUniteEnsignementSchema'
+      responses:
+        '201':
+          description: La ressource(unite d'enseignement) a ete creee avec succes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUniteEnseignementSchema'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /unite-enseignements/{unite-enseignement_id}:
+    parameters:
+    - in : path 
+      name: unite-enseignement_id
+      schema: 
+        type: string
+        format: uuid
+    
+    get:
+      summary: Retourne les details d'une Unite d'enseignement specifique
+      operationId: getUniteEnseignement
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/UniteEnseignementItemSchema'
+        '404':
+          $ref: "#/components/responses/NotFound"
+        '422':
+          $ref: "#/components/responses/UnprocessableEntity"
+
+    put:
+      summary: Mettre totalement à jour une Unite d'enseignement existante et bien precise
+      operationId: updateUniteEnseignement
+      requestbody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/CreateUniteEnsignementSchema'
+      responses:
+        '200':
+          description: OK
+          content: 
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/UniteEnseignementItemSchema'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete: 
+      summary: Supprimer une ressource (unite d'enseignement) existante
+      operationId: deleteUniteEnseignement
+      responses:
+        '204':
+          description: La ressource a ete supprimee avec succes
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: "#/components/responses/UnprocessableEntity"
+
+  #Semestre 
+  /semestre:
+    get:
+      parameters:
+      -name : limit
+      in: querry
+      required: false
+      schema:
+        type: integer
+      summary: Retourne la liste des semestres 
+      operationId: getSemestres
+      description: >
+        Une liste des semestres crees presents dans la bd, pouvant etre filtree
+        suivant un nombre determine (limite).
+      responses:
+        '200':
+          description: OK
+          content: 
+            application/json:
+              schema: 
+                type: object
+                additionalProperties: false
+                properties:
+                  semestres:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GetSemestreSchema'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/reponses/UnprocessableEntity'
+
+    post:
+      summary: Ajout de(s) semestre(s)
+      opertationId: ajoutSemestre
+      requestbody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSemestreSchema'
+      responses:
+        '201':
+          description: Le semestre a ete ajoute avec succes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetSemestreSchema'
+        '422':
+          $ref: "#/components/responses/UnprocessableEntity"
+
+  /semestre/{semestre_id}:
+    get:
+      summary: Retourn les details d'un semestre specifique
+      operationId: getSemetre
+      parameters:
+        - in : path
+          name : semestre_id
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetSemestreSchema"
+        "404":
+          $ref: "#/components/schemas/NotFound"
+        '422': 
+          $ref : "#/components/responses/UnprocessableEntity"
+    put:
+      summary: Mettre à jour les informations d'un semestre
+      operationId: updateUniteSemestre
+      requestbody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/GetSemestreSchema'
+      responses:
+        '200':
+          description: OK
+          content: 
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/GetSemestreSchema'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete:
+      summary: Supprimer une ressource (semestre) existante
+      operationId: deleteSemestre
+      responses:
+        '204':
+          description: La ressource a ete supprimee avec succes
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: "#/components/responses/UnprocessableEntity"
+
+  #Groupe
+  /groupe:
+    get:
+      parameters:
+      -name : limit
+      in: querry
+      required: false
+      schema:
+        type: integer
+      summary: Retourne la liste des groupes
+      operationId: getGroupes
+      description: >
+        Une liste de groupe(s) cree(s) present(s) dans la bd, pouvant etre filtre
+        suivant un nombre determine (limite).
+      responses:
+        '200':
+          description: OK
+          content: 
+            application/json:
+              schema: 
+                type: object
+                additionalProperties: false
+                properties:
+                  groupes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GroupeSchema'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/reponses/UnprocessableEntity'
+
+    post:
+      summary: Ajout de(s) groupe(s)
+      opertationId: ajoutGroupe
+      requestbody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupeSchema'
+      responses:
+        '201':
+          description: Le groupe a ete ajoute avec success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupeSchema'
+        '422':
+          $ref: "#/components/responses/UnprocessableEntity"
+  /groupe/{groupe_id}:
+    get:
+      summary: Retourn les details d'un groupe specifique
+      operationId: getGroupe
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupeSchema"
+        "404":
+          $ref: "#/components/schemas/NotFound"
+        '422': 
+          $ref : "#/components/responses/UnprocessableEntity"
+    put:
+      summary: Mettre à jour les informations d'un groupe
+      operationId: updateGroupe
+      requestbody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/GroupeSchema'
+      responses:
+        '200':
+          description: OK
+          content: 
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/GetSemestreSchema'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete:
+      summary: Supprimer une ressource (groupe) existant
+      operationId: deleteGroupe
+      responses:
+        '204':
+          description: La ressource a ete supprimee avec succes
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: "#/components/responses/UnprocessableEntity"
+
+  #Filiere
+  /filiere:
+    get:
+      parameters:
+      -name : limit
+      in: querry
+      required: false
+      schema:
+        type: integer
+      summary: Retourne la liste des filieres
+      operationId: getFilieres
+      description: >
+        Une liste de filiere(s) cree(s) present(s) dans la bd, pouvant etre filtre
+        suivant un nombre determine (limite).
+      responses:
+        '200':
+          description: OK
+          content: 
+            application/json:
+              schema: 
+                type: object
+                additionalProperties: false
+                properties:
+                  filieres:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FiliereSchema'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/reponses/UnprocessableEntity'
+    post:
+      summary: Ajout de(s) filiere(s)
+      opertationId: ajoutGroupe
+      requestbody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FiliereSchema'
+      responses:
+        '201':
+          description: La filiere a ete ajoutee avec success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FiliereSchema'
+        '422':
+          $ref: "#/components/responses/UnprocessableEntity"
+
+  /filiere/{filiere_id}:
+    get:
+      summary: Retourn les details d'un filiere specifique
+      operationId: getSemetre
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetFiliereSchema"
+        "404":
+          $ref: "#/components/schemas/NotFound"
+        '422': 
+          $ref : "#/components/responses/UnprocessableEntity"
+    put:
+      summary: Mettre à jour les informations d'une filiere
+      operationId: updateUniteSemestre
+      requestbody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/GetFiliereSchema'
+      responses:
+        '200':
+          description: OK
+          content: 
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/GetFiliereSchema'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+    delete:
+      summary: Supprimer une ressource (filiere) existante
+      operationId: deleteFiliere
+      responses:
+        '204':
+          description: La ressource a ete supprimee avec succes
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: "#/components/responses/UnprocessableEntity"
+
+  #Spécialité
+  /specialite:
+    get:
+      parameters:
+      -name : limit
+      in: querry
+      required: false
+      schema:
+        type: integer
+      summary: Retourne la liste des filieres
+      operationId: getFilieres
+      description: >
+        Une liste de specialite(s) cree(s) present(s) dans la bd, pouvant etre filtre
+        suivant un nombre determine (limite).
+      responses:
+        '200':
+          description: OK
+          content: 
+            application/json:
+              schema: 
+                type: object
+                additionalProperties: false
+                properties:
+                  specialites:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SpecialiteSchema'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/reponses/UnprocessableEntity'
+
+    post:
+      summary: Ajout de(s) specialite(s)
+      opertationId: ajoutGroupe
+      requestbody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SpecialiteSchema'
+      responses:
+        '201':
+          description: La specialite a ete ajoutee avec success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpecialiteSchema'
+        '422':
+          $ref: "#/components/responses/UnprocessableEntity"
+
+  /specialite/{specialite_id}:
+    get:
+      summary: Retourn les details d'un specialite specifique
+      operationId: getSemetre
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpecialiteSchema"
+        "404":
+          $ref: "#/components/schemas/NotFound"
+        '422': 
+          $ref : "#/components/responses/UnprocessableEntity"
+    put:
+      summary: Mettre à jour les informations d'une specialite
+      operationId: updateUniteSemestre
+      requestbody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/SpecialiteSchema'
+      responses:
+        '200':
+          description: OK
+          content: 
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/SpecialiteSchema'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete:
+      summary: Supprimer une ressource (specialite) existante
+      operationId: deletespecialite
+      responses:
+        '204':
+          description: La ressource a ete supprimee avec succes
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: "#/components/responses/UnprocessableEntity"
+
+components:
+
+  schemas:
+
+    Error:
+      type: object
+      properties: 
+        detail:
+          oneOf:
+            - type: string
+            - type: array
+      required:
+        - detail
+      additionalProperties: false
+
+    UniteEnseignementItemSchema:
+        additionalProperties: false
+        type: object
+        required:
+          - id
+          - code
+          - intitule
+          - isTroncCommun
+          - nombreCredit
+          - coefficient
+          - groupe_id
+          - semestre_id
+        properties:
+          id:
+            type: uuid
+          groupe_id:
+            type: uuid
+          semestre_id:
+            type: uuid
+          code:
+            type: string
+          intitule:
+            type: string
+          isTroncCommun: 
+            type: boolean
+          nombreCredit:
+            type: integer
+          coefficient:
+            type: integer
+          volumeHoraireTD:
+            type: number
+          volumeHoraireCM:
+            type: number
+          volumeHoraireTPE:
+            type: number
+          volumeHoraireTP:
+            type: number
+    
+    
+    GetUniteEnseignementSchema:
+      additionalProperties: false
+      type: object
+      properties:
+        unite-enseignement:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/UniteEnseignementItemSchema"
+    
+
+  
+    CreateUniteEnsignementSchema:
+      additionalProperties: false
+      type: object
+      required:
+        - unite-enseignement
+      properties:
+        unite-enseignement:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/UniteEnseignementItemSchema'
+    
+
+    GetSemestreSchema:
+      additionnalProperties: false
+      type: object
+      properties:
+        intitule: 
+          type: string
+          required: true
+        date_debut:
+          type: string
+          format: date
+        date_fin:
+          type: string
+          format: date
+
+    CreateSemestreSchema:
+      additionalProperties: false
+      type: object
+      properties:
+        intitule: 
+          type: string
+        date_debut:
+          type: string
+          format: date
+        date_fin:
+          type: string
+          format: date
+          
+    GroupeSchema:
+      additionnalProperties: false
+      type: object
+      properties:
+        id: 
+          type: integer
+        intitule: 
+          type: string
+        credit_groupe:
+          type: integer
+        coef_groupe: 
+          type: integer
+
+    FiliereSchema:
+      additionnalProperties: false
+      type: object
+      properties:
+        id:
+          type: integer
+        intitule:
+          type: string
+    
+    SpecialiteSchema:
+      additionnalProperties: false
+      type: object
+      properties:
+        id:
+          type: integer
+        intitule:
+          type: string
+
+  responses: 
+    NotFound:
+      description: La ressource recherchee n'a pas ete retrouvee.
+      content:
+        application/json:
+          schema: 
+            $ref: '#/components/schemas/Error'
+    UnprocessableEntity:
+      description: Le corps de la requete contient des valeurs invalides
+      content: 
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  securitySchemes:
+
+
+security:
