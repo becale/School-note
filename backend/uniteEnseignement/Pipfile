@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 pyyaml = "*"
+fastapi = {extras = ["standard"], version = "*"}
 
 [dev-packages]
 
